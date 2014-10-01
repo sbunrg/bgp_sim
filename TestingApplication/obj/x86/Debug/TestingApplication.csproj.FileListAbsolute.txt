@@ -1,0 +1,36 @@
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.exe
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.pdb
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\SecureSimulator.dll
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\SecureSimulator.pdb
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\TestingApplication.exe
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\TestingApplication.pdb
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.exe.config
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\CloudLibrary.dll
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.dll
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\CloudLibrary.pdb
+C:\Users\phillipa\Desktop\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.xml
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.exe.config
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.exe
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\TestingApplication.pdb
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\CloudLibrary.dll
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\SecureSimulator.dll
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.dll
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\SecureSimulator.pdb
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\CloudLibrary.pdb
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.xml
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\ResolveAssemblyReference.cache
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\TestingApplication.exe
+G:\Research\adoptTraffic\Code\AzureSecureSimulator\TestingApplication\obj\x86\Debug\TestingApplication.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\TestingApplication.exe.config
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\TestingApplication.exe
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\TestingApplication.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\CloudLibrary.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\SecureSimulator.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\SecureSimulator.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\CloudLibrary.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Debug\Microsoft.WindowsAzure.StorageClient.xml
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Debug\TestingApplication.csprojResolveAssemblyReference.cache
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Debug\TestingApplication.exe
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Debug\TestingApplication.pdb

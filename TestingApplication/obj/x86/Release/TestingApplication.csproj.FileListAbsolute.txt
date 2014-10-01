@@ -1,0 +1,12 @@
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\TestingApplication.exe.config
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\TestingApplication.exe
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\TestingApplication.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\CloudLibrary.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\SecureSimulator.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\Microsoft.WindowsAzure.StorageClient.dll
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\SecureSimulator.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\CloudLibrary.pdb
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\bin\Release\Microsoft.WindowsAzure.StorageClient.xml
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Release\TestingApplication.csprojResolveAssemblyReference.cache
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Release\TestingApplication.exe
+C:\Users\Haseeb\Dropbox\Project\Archive 2\TestingApplication\obj\x86\Release\TestingApplication.pdb
