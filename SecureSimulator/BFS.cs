@@ -13,7 +13,7 @@ namespace SecureSimulator
      public static class ModifiedBfs
     {
          //default to  hash.
-         public static bool Hash=true;
+		public static bool Hash=false;
          public static bool OnlyNonStubs = false;
 
 
