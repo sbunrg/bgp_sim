@@ -12,3 +12,17 @@ G:\Research\adoptTraffic\Code\AzureSecureSimulator\TrafficEngineeringCode\bin\De
 G:\Research\adoptTraffic\Code\AzureSecureSimulator\TrafficEngineeringCode\bin\Debug\SecureSimulator.dll
 G:\Research\adoptTraffic\Code\AzureSecureSimulator\TrafficEngineeringCode\bin\Debug\SecureSimulator.pdb
 G:\Research\adoptTraffic\Code\AzureSecureSimulator\TrafficEngineeringCode\obj\x86\Debug\ResolveAssemblyReference.cache
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\bin\Debug\TrafficEngineeringCode.exe
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\bin\Debug\TrafficEngineeringCode.pdb
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\bin\Debug\SecureSimulator.dll
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\bin\Debug\SecureSimulator.pdb
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.csprojResolveAssemblyReference.cache
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.exe
+E:\workingdir\TestingCSharpCode\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.pdb
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\bin\Debug\TrafficEngineeringCode.exe
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\bin\Debug\TrafficEngineeringCode.pdb
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\bin\Debug\SecureSimulator.dll
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\bin\Debug\SecureSimulator.pdb
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.csprojResolveAssemblyReference.cache
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.exe
+C:\Users\Haseeb\workingdir\RoutingPoliciesProject\TrafficEngineeringCode\obj\x86\Debug\TrafficEngineeringCode.pdb

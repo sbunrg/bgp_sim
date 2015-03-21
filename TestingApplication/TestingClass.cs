@@ -59,6 +59,9 @@ namespace TestingApplication
 
         public void CLI(bool script)
         {
+			bool debug = false;
+			bool decoy_sim = false;
+
             string resp;
             List<Destination> d = new List<Destination>();
             NetworkGraph g = new NetworkGraph();
@@ -83,10 +86,39 @@ namespace TestingApplication
                 globalState.W[i] = 1;
             
 
-            Console.WriteLine("Welcome to the testing interface: (type help for help) 66000 ");
+            Console.WriteLine("Welcome to the testing interface: (type help for help) Haseeb Mac");
             bool exitNow = false;
             
-            
+            //Automatcally load Cyclops_caida.txt
+			if (decoy_sim)
+			{
+				String load = "inputfile decoy/Cyclops_poison.txt";
+            	initGraph(ref g, load);
+            	globalState.nonStubs = g.getNonStubs();
+				Console.WriteLine("Cyclops_poison.txt Loaded!");
+			} else {
+				String load = "inputfile Cyclops_caida_new.txt";
+				initGraph(ref g, load);
+				globalState.nonStubs = g.getNonStubs();
+				Console.WriteLine("Cyclops_caida_new.txt Loaded!");
+			}
+
+            //DEBUG
+			if (debug) {
+				String debugC = "analysepathfile test.txt";
+				analysePathfile (ref g, debugC);
+				exitNow = true;
+			} else if (decoy_sim) {
+				string dst;
+
+				using (StreamReader reader = new StreamReader("decoy/helper.txt")) {
+					dst = reader.ReadLine();
+				}
+				String decoyC = "all_path_info " + dst;
+				all_path_info(ref d, ref g, decoyC);
+				exitNow = true;
+			}
+
             while(!exitNow)
             {
                 if (input.EndOfStream)
@@ -96,75 +128,73 @@ namespace TestingApplication
                     Console.WriteLine("script has ended, now in interactive mode");
                 }
                 Console.Write(">>");
-				string command = input.ReadLine ().ToLower();
-                if (command.IndexOf("input") == 0)
-                {
-                    initGraph(ref g, command);
-                    globalState.nonStubs = g.getNonStubs();
-                }
-                else if (command.IndexOf("destination") == 0)
-                {
+                string command = input.ReadLine().ToLower();
 
-                    if (command.IndexOf("all") < 0)
-                    {
-						Stopwatch stopwatch = new Stopwatch();
-						stopwatch.Reset();
-						stopwatch.Start();
-                        Destination newD = new Destination();
-                        if (initDestination(ref g, ref newD, command))
-                        {
-                            d.Add(newD);
-							stopwatch.Stop();
-							Console.WriteLine("initialized and added " + newD.destination);
-							Console.WriteLine("Tree generation took (ms): " + stopwatch.ElapsedMilliseconds);
+				if (command.IndexOf ("input") == 0) {
+					initGraph (ref g, command);
+					globalState.nonStubs = g.getNonStubs ();
+				} else if (command.IndexOf ("destination") == 0) {
 
-                        }
-                    }
-                    else
-                    {
-                        IEnumerable<AsNode> allASes = g.GetAllNodes();
-                        foreach (AsNode AS in allASes)
-                        {
-                            Destination newD = new Destination();
-                            if (initDestination(ref g, ref newD, "destination " + AS.NodeNum))
-                            {
-                                d.Add(newD);
-                                Console.WriteLine("initialized and added " + newD.destination);
-                            }
-                        }
-                    }
+					if (command.IndexOf ("all") < 0) {
+						Destination newD = new Destination ();
+						if (initDestination (ref g, ref newD, command)) {
+							d.Add (newD);
+							Console.WriteLine ("initialized and added " + newD.destination);
+						}
+					} else {
+						IEnumerable<AsNode> allASes = g.GetAllNodes ();
+						foreach (AsNode AS in allASes) {
+							Destination newD = new Destination ();
+							if (initDestination (ref g, ref newD, "destination " + AS.NodeNum)) {
+								d.Add (newD);
+								Console.WriteLine ("initialized and added " + newD.destination);
+							}
+						}
+					}
 
-                }
-                else if (command.IndexOf("resultsexplorer") == 0)
-                {
-                    ResultsExplorer res = new ResultsExplorer();
-                    res.ResultsInterface();
-                }
-                else if (command.IndexOf("setstate") == 0)
-                    initS(ref  globalState.S, command);
-                else if (command.IndexOf("addedges") == 0)
-                    addEdges(command, ref g);
-                else if (command.IndexOf("getlink") == 0)
-                    getLink(command, ref g);
-                else if (command.IndexOf("flipallu") == 0)
-                    flipallU(ref d, ref g, ref globalState, command);
-                else if (command.IndexOf("printstate") == 0)
-                    printState(ref  globalState.S, command);
-                else if (command.IndexOf("printsecp") == 0)
-                    printSecP(ref d, command);
-               
-                else if (command.IndexOf("getl") == 0)
-                    getL(ref d, command);
-                else if (command.IndexOf("getw") == 0)
-                    getW(ref globalState.W, command);
-                else if (command.IndexOf("printw") == 0)
-                    printWeight(ref globalState.W, command);
-                else if (command.IndexOf("setw") == 0)
-                    setW(ref globalState.W, command);
-                else if (command.IndexOf("getbest") == 0)
-                    getBest(ref d, command);
-                else if (command.IndexOf("getpath") == 0)
-                    getPath(ref d, command);
+				} else if (command.IndexOf ("resultsexplorer") == 0) {
+					ResultsExplorer res = new ResultsExplorer ();
+					res.ResultsInterface ();
+				} else if (command.IndexOf ("setstate") == 0)
+					initS (ref  globalState.S, command);
+				else if (command.IndexOf ("addedges") == 0)
+					addEdges (command, ref g);
+				else if (command.IndexOf ("getlink") == 0)
+					getLink (command, ref g);
+				else if (command.IndexOf ("flipallu") == 0)
+					flipallU (ref d, ref g, ref globalState, command);
+				else if (command.IndexOf ("printstate") == 0)
+					printState (ref  globalState.S, command);
+				else if (command.IndexOf ("printsecp") == 0)
+					printSecP (ref d, command);
+				else if (command.IndexOf ("getl") == 0)
+					getL (ref d, command);
+				else if (command.IndexOf ("getw") == 0)
+					getW (ref globalState.W, command);
+				else if (command.IndexOf ("printw") == 0)
+					printWeight (ref globalState.W, command);
+				else if (command.IndexOf ("setw") == 0)
+					setW (ref globalState.W, command);
+				else if (command.IndexOf ("getbestnew") == 0)
+					getBestNew (ref d, command);
+				else if (command.IndexOf ("getbest") == 0)
+					getBest (ref d, command);
+				else if (command.IndexOf ("all_path_info") == 0)
+					all_path_info (ref d, ref g, command);
+				else if (command.IndexOf ("getpath") == 0)
+					getPath (ref d, ref g, command);
+				else if (command.IndexOf ("analysepathfile") == 0)
+					analysePathfile (ref g, command);
+				else if (command.IndexOf ("analysepath") == 0)
+					analysePath (ref g, command);
+				else if (command.IndexOf ("serialise") == 0)
+					serialisePathArrays (ref g, command);
+				else if (command.IndexOf ("getallpathsoflength") == 0)
+					getAllPathsoflength (ref d, ref g, command);
+				else if (command.IndexOf ("getallpathsto") == 0)
+					getAllPathsTo (ref d, ref g, command);
+				else if (command.IndexOf ("getallpaths") == 0)
+					getAllPaths (ref d, ref g, command);
                 else if (command.IndexOf("getsecp") == 0)
                     getSecP(ref d, command);
                 else if (command.IndexOf("getutility") == 0)
@@ -181,6 +211,8 @@ namespace TestingApplication
                     computeNotN(ref d, ref globalState, ref w, command);
                 else if (command.IndexOf("wgetsecp") == 0)
                     getWorkerSecP(ref w, command);
+                else if (command.IndexOf("checkpath") == 0)
+                    checkPath(command);
                 else if (command.IndexOf("initglobalstate") == 0)
                     initGlobalState(command, ref g, ref globalState);
                 else if (command.IndexOf("wgetpath") == 0)
@@ -1257,7 +1289,6 @@ namespace TestingApplication
                 Console.WriteLine("invalid ASN or destination.");
                 return false;
             }
-
             foreach (Destination d in ds)
             {
                 if (d.destination == dstNum)
@@ -1271,9 +1302,306 @@ namespace TestingApplication
             return false;
         }
 
-        private bool getPath(ref List<Destination> ds, string command)
+        private bool getBestNew(ref List<Destination> ds, string command)
         {
-               string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 3)
+            {
+                Console.WriteLine("error: usage getbestnew <as#> <dstnum>");
+                return false;
+            }
+
+            int dstNum;
+            int ASN;
+            if (!int.TryParse(cpieces[1], out ASN) || !int.TryParse(cpieces[2], out dstNum))
+            {
+                Console.WriteLine("invalid ASN or destination.");
+                return false;
+            }
+            foreach (Destination d in ds)
+            {
+                if (d.destination == dstNum)
+                {
+
+                    Console.WriteLine("BestNew[i] of " + ASN + " in the BFS rooted at " + d.destination + " is " + d.GetBestNew(ASN));
+                    return true;
+                }
+            }
+            Console.WriteLine("could not find destination.");
+            return false;
+        }
+
+        private bool getAllPathsTo(ref List<Destination> ds, ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 2)
+            {
+                Console.WriteLine("error: usage getallpathsto <dstnum>");
+                return false;
+            }
+
+            int dstNum;
+            if (!int.TryParse(cpieces[1], out dstNum))
+            {
+                Console.WriteLine("invalid destination.");
+                return false;
+            }
+
+            Destination newD = new Destination();
+            if (initDestination(ref graph, ref newD, "destination " + dstNum))
+            {
+                newD.totalCount = 0;
+                ds.Add(newD);
+                Console.WriteLine("HN: initialized and added " + newD.destination);
+                
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                        
+                for (int i = Constants._numASNs-1; i >= 0 ; i--)
+                {
+                    if (i != newD.destination)
+                    {
+                        string com = "getallpaths " + i + " " + dstNum;
+						getAllPaths(ref ds, ref graph, com);
+                        Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+                    }
+                }
+
+                TextWriter tw = new StreamWriter("time.txt");
+
+                // write a line of text to the file
+                tw.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+                tw.WriteLine("Total Paths Computed: " + newD.totalCount);
+                stopwatch.Reset();
+                // close the stream
+                tw.Close();
+
+                ds.Remove(newD);
+                return true;
+            }
+
+
+
+            Console.WriteLine("could not find destination");
+            return false;
+        }
+
+		private bool getAllPathsoflength(ref List<Destination> ds, ref NetworkGraph graph, string command)
+		{
+			string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+			if (cpieces.Length < 4)
+			{
+				Console.WriteLine("error: usage getallpathsoflength <length> <as#> <dstnum>");
+				return false;
+			}
+
+			int dstNum, length;
+			UInt32 ASN;
+			if (!UInt32.TryParse(cpieces[2], out ASN) || !int.TryParse(cpieces[3], out dstNum) || !int.TryParse(cpieces[1], out length))
+			{
+				Console.WriteLine("invalid ASN or destination or length.");
+				return false;
+			}
+
+			Destination newD = new Destination();
+			if (initDestination(ref graph, ref newD, "destination " + dstNum))
+			{
+				ds.Add(newD);
+				Console.WriteLine("HN: initialized and added " + newD.destination);
+
+			}
+
+			foreach (Destination d in ds)
+			{
+				if (d.destination == dstNum)
+				{
+					if (d.BestNew[ASN] != null)
+					{
+						//d.Best[0]++;
+						List<List<UInt32>> allPaths = new List<List<UInt32>>();
+						List<UInt32> pathNew = new List<UInt32>();
+						UInt32 first = (UInt32)((ASN << 3) + Destination._NOREL);
+						pathNew.Add(first);
+						//Console.Write("First: " + (UInt32)(((uint)first) >> 3) + "\n");
+
+						string fileName = "all_paths_of_length_"+ length + "_" + ASN + "-" + d.destination + ".txt";
+
+						//if (!Directory.Exists(d.destination + "\\"))
+						//{
+						// Try to create the directory.
+						//    DirectoryInfo di = Directory.CreateDirectory(d.destination + "\\");
+						//}
+
+						TextWriter tw = new StreamWriter(fileName);
+						int count = 0;
+						int counter = 0;
+
+						Stopwatch stopwatch = new Stopwatch();
+						stopwatch.Start();
+
+						d.GetAllPaths(ASN, (UInt32)dstNum, ref allPaths, pathNew, ref tw, ref count);
+
+						for (int j = 0; j < allPaths.Count; j++)
+						{
+							if (allPaths [j].Count == length) {
+								tw.WriteLine (pathString (allPaths [j]));
+								counter++;
+							}
+						}
+						allPaths.Clear();
+
+						Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+						stopwatch.Reset();
+
+						tw.Close();
+
+						d.totalCount = d.totalCount + count;
+
+						if (count == 0)
+						{
+							File.Delete(fileName);
+						}
+
+						//writePathsToFile(allPaths);
+						Console.WriteLine(counter + " Number of paths found from " + ASN + " to " + dstNum);
+						return true;
+					}
+					else
+					{
+						Console.WriteLine("No path from " + ASN);
+					}
+				}
+			}
+
+			Console.WriteLine("could not find destination");
+			return false;
+		}
+
+		private bool getAllPaths(ref List<Destination> ds, ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 3)
+            {
+                Console.WriteLine("error: usage getallpaths <as#> <dstnum>");
+                return false;
+            }
+
+            int dstNum;
+            UInt32 ASN;
+            if (!UInt32.TryParse(cpieces[1], out ASN) || !int.TryParse(cpieces[2], out dstNum))
+            {
+                Console.WriteLine("invalid ASN or destination.");
+                return false;
+            }
+
+			Destination newD = new Destination();
+			if (initDestination(ref graph, ref newD, "destination " + dstNum))
+			{
+				ds.Add(newD);
+				Console.WriteLine("HN: initialized and added " + newD.destination);
+
+			}
+
+            foreach (Destination d in ds)
+            {
+                if (d.destination == dstNum)
+                {
+                    if (d.BestNew[ASN] != null)
+                    {
+                        //d.Best[0]++;
+                        List<List<UInt32>> allPaths = new List<List<UInt32>>();
+                        List<UInt32> pathNew = new List<UInt32>();
+                        UInt32 first = (UInt32)((ASN << 3) + Destination._NOREL);
+                        pathNew.Add(first);
+                        //Console.Write("First: " + (UInt32)(((uint)first) >> 3) + "\n");
+
+                        string fileName = "all_paths_" + ASN + "-" + d.destination + ".txt";
+
+                        //if (!Directory.Exists(d.destination + "\\"))
+                        //{
+                            // Try to create the directory.
+                        //    DirectoryInfo di = Directory.CreateDirectory(d.destination + "\\");
+                        //}
+
+                        TextWriter tw = new StreamWriter(fileName);
+                        int count = 0;
+
+                        Stopwatch stopwatch = new Stopwatch();
+                        stopwatch.Start();
+                        
+                        d.GetAllPaths(ASN, (UInt32)dstNum, ref allPaths, pathNew, ref tw, ref count);
+
+                        for (int j = 0; j < allPaths.Count; j++)
+                        {
+								tw.WriteLine (pathString (allPaths [j]));
+                        }
+                        allPaths.Clear();
+
+                        Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+                        stopwatch.Reset();
+
+                        tw.Close();
+
+                        d.totalCount = d.totalCount + count;
+
+                        if (count == 0)
+                        {
+                            File.Delete(fileName);
+                        }
+
+                        //writePathsToFile(allPaths);
+                        Console.WriteLine(count + " Number of paths found from " + ASN + " to " + dstNum + " ! Total =  " + d.totalCount);
+                        return true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("No path from " + ASN);
+                    }
+                }
+            }
+
+            Console.WriteLine("could not find destination");
+            return false;
+        }
+
+		private bool all_path_info(ref List<Destination> ds, ref NetworkGraph graph, string command)
+		{
+			TextWriter tw = new StreamWriter("decoy/all_path_info.txt");
+			string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+			if (cpieces.Length < 2)
+			{
+				Console.WriteLine("error: usage all_path_info <dstnum>");
+				return false;
+			}
+
+			int dstNum;
+			if (!int.TryParse(cpieces[1],out dstNum))
+			{
+				Console.WriteLine("invalid destination.");
+				return false;
+			}
+
+			Destination newD = new Destination();
+			if (initDestination (ref graph, ref newD, "destination " + dstNum)) {
+				ds.Add (newD);
+				Console.WriteLine ("HN: initialized and added " + newD.destination);
+			} else {
+				Console.WriteLine ("could not find destination");
+				return false; 
+			}
+
+			var lines = File.ReadAllLines("decoy/all_asn.txt");
+			foreach (var line in lines) 
+			{
+				UInt32 ASN = Convert.ToUInt32(line);
+				tw.WriteLine(ASN + " " + newD.GetPath(ASN));
+			}
+			return true;
+		}
+
+        private bool getPath(ref List<Destination> ds, ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             if (cpieces.Length < 3)
             {
                 Console.WriteLine("error: usage getpath <as#> <dstnum>");
@@ -1292,17 +1620,268 @@ namespace TestingApplication
             {
                 if (d.destination == dstNum)
                 {
+					//d.Best[0]++;
 
                     Console.WriteLine("Path from " + ASN + " to " + d.destination + " is " + d.GetPath(ASN));
                     return true;
                 }
             }
-            Console.WriteLine("could not find destination");
-            return false;
 
-            
+            //Added by Haseeb *Computes destination so getPath doesnt return false if the destination is not initialised before calling getPath
+
+            Destination newD = new Destination();
+            if (initDestination(ref graph, ref newD, "destination " + dstNum))
+            {
+                ds.Add(newD);
+                Console.WriteLine("HN: initialized and added " + newD.destination);
+
+                //newD.Best[0]++;
+
+                Console.WriteLine("HN: Path from " + ASN + " to " + newD.destination + " is " + newD.GetPath(ASN));
+                return true;
+            }
+
+
+
+            Console.WriteLine("could not find destination");
+            return false;            
         }
 
+        private void checkPath(string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 2)
+            {
+                Console.WriteLine("error: usage checkpath <path (comma seperated)>");
+                return;
+            }
+
+            string[] temp = cpieces[1].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            PathChecker pathChecker = new PathChecker();
+            int dest;
+            int.TryParse(temp[temp.Length -1], out dest);
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            List<UInt32>[] bestNew = pathChecker.deserializeBestNew(dest, "z\\");
+            
+            Console.WriteLine("Time to Load Binary: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Stop();
+            stopwatch.Reset();
+
+            if (bestNew == null)
+            {
+                Console.WriteLine("Could not find file to desrialise!");
+                return;
+            }
+
+            if (pathChecker.pathAvailable(cpieces[1], bestNew)) 
+            { Console.WriteLine("Path Found!"); }
+            else 
+            { Console.WriteLine("Path Not Found!"); }
+
+            stopwatch.Start();
+            for (int j = 0; j < 100; j++)
+            {
+                pathChecker.pathAvailable(cpieces[1], bestNew);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Time to check 100 paths: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+
+            stopwatch.Start();
+            for (int j = 0; j < 1000; j++)
+            {
+                pathChecker.pathAvailable(cpieces[1], bestNew);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Time to check 1000 paths: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+
+            stopwatch.Start();
+            for (int j = 0; j < 10000; j++)
+            {
+                pathChecker.pathAvailable(cpieces[1], bestNew);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Time to check 10000 paths: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+
+            stopwatch.Start();
+            for (int j = 0; j < 100000; j++)
+            {
+                pathChecker.pathAvailable(cpieces[1], bestNew);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Time to check 100000 paths: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+          
+        }
+
+        private bool analysePath(ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 3)
+            {
+                Console.WriteLine("error: usage analysepath <dstnum> <path>");
+                return false;
+            }
+
+            int dstNum;
+            string path = cpieces[2];
+
+            if (!int.TryParse(cpieces[1], out dstNum))
+            {
+                Console.WriteLine("invalid destination.");
+                return false;
+            }
+
+            PathChecker pathChecker = new PathChecker();
+
+            if (dstNum > Constants._numASNs)
+            {
+                return false;
+            }
+
+            Destination newD2 = new Destination();
+            if (initDestination(ref graph, ref newD2, "destination " + dstNum))
+            {
+                Console.WriteLine("HN: initialized " + newD2.destination);
+
+                pathChecker.pathAnalysis(path, ref newD2);
+                return true;
+            }
+            return false;
+        }
+
+        private void analysePathfile(ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 2)
+            {
+                Console.WriteLine("error: usage analysepathfile <filename>");
+                return;
+            }
+
+            TextWriter tw = new StreamWriter("result_bucket.txt");
+            TextWriter twViolation = new StreamWriter("violation_bucket.txt");
+            TextWriter twMissing = new StreamWriter("missing_bucket.txt");
+            TextWriter twRandom = new StreamWriter("random_file.txt");
+            //for (int i = 0; i < allPaths.Count; i++)
+            //{
+            //    tw.WriteLine(pathString(allPaths[i]));
+            //}
+            //tw.Close();
+
+            using (var reader = new StreamReader(cpieces[1]))
+            {
+                PathChecker pathChecker = new PathChecker();
+                Destination newD2 = new Destination();
+                initDestination(ref graph, ref newD2, "destination " + "1");
+
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] lpieces = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    if (lpieces.Length == 2)
+                    {
+                        int dstNum;
+                        string path = lpieces[1];
+
+                        if (!int.TryParse(lpieces[0], out dstNum))
+                        {
+                            Console.WriteLine("invalid destination. " + lpieces[0]);
+                            continue;
+                        }
+                        if (dstNum > Constants._numASNs)
+                        {
+                            continue;
+                        }
+
+                        if (dstNum != newD2.destination)
+                        {
+                            try
+                            {
+                                initDestination(ref graph, ref newD2, "destination " + dstNum);
+                            }
+                            catch (Exception x)
+                            {
+                                Console.Out.WriteLine("Exception computing dest: " + dstNum);
+                                continue;
+                            }
+                        }
+                        try
+                        {
+                            string result = pathChecker.pathAnalysis(path, ref newD2, ref twMissing, ref twRandom, ref twViolation);
+                            tw.WriteLine(result); tw.Flush();
+                        }
+                        catch (Exception y)
+                        {
+                            Console.Out.WriteLine("Exception analysing path: " + path);
+                            continue;
+                        }
+                    }
+                }
+            }
+            tw.Close();
+            twMissing.Close();
+            twRandom.Close();
+        }
+
+        private bool serialisePathArrays(ref NetworkGraph graph, string command)
+        {
+            string[] cpieces = command.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (cpieces.Length < 3)
+            {
+                Console.WriteLine("error: usage serialise <dstnum> <path>");
+                return false;
+            }
+
+            int dstNum;
+            string path;
+
+            if (!int.TryParse(cpieces[1], out dstNum))
+            {
+                Console.WriteLine("invalid destination.");
+                return false;
+            }
+
+            PathChecker pathChecker = new PathChecker();
+
+            
+            if (dstNum == -1)
+            {
+                for (int i = 0; i < Constants._numASNs; i++)
+                {
+                    Destination newD = new Destination();
+                    try
+                    {
+                        if (initDestination(ref graph, ref newD, "destination " + i))
+                        {
+                            pathChecker.serializeBestNew(newD.BestNew, i, cpieces[2]);
+                        }
+                    }
+                    catch(Exception)
+                    {
+                    }
+                }
+                return true;
+            }
+
+            Destination newD2 = new Destination();
+            if (initDestination(ref graph, ref newD2, "destination " + dstNum))
+            {
+                Console.WriteLine("HN: initialized " + newD2.destination + "\t Calling serialiser");
+                
+                pathChecker.serializeBestNew(newD2.BestNew, dstNum, cpieces[2]);
+
+                return true;
+            }
+
+            return false;
+        }
         private bool getWorkerPath(ref Worker w, string command)
         {
             string resp;
@@ -1601,6 +2180,10 @@ namespace TestingApplication
                  tempS[i] = false; ;
              d.UpdatePaths(tempS);//init paths with S = all false
              Console.WriteLine("done initializing. Current active destination is: " + destNum);
+            List<UInt32> temp = new List<UInt32>();
+            temp.Add(d.destination);
+            d.BestNew[d.destination] = temp;
+            //Console.Write("Dest BestNew["+ d.destination + "] = " + d.BestNew[d.destination][0]);
             return true;
         }
 
@@ -1650,6 +2233,50 @@ namespace TestingApplication
 
         }
 
+        private string pathString(List<UInt32> path)
+        {
+            string toreturn = "";
+            toreturn = toreturn + Convert.ToString((UInt32)(((uint)path[0]) >> 3));
+            for (int j = 1; j < path.Count; j++)
+            {
+                UInt32 asn;
+                int col;
+                asn = (UInt32)(((uint)path[j]) >> 3);
+                col = (int)(path[j] & 7);
+
+                switch (col)
+                {
+                    case 0:
+                        toreturn = toreturn + " <- ";
+                        break;
+                    case 1:
+                        toreturn = toreturn + " -- ";
+                        break;
+                    case 2:
+                        toreturn = toreturn + " -> ";
+                        break;
+                    case 3:
+                        break;
+                }
+
+                toreturn = toreturn + asn;
+            }
+
+            return toreturn;
+
+        }
+
+        private void writePathsToFile(List<List<UInt32>> allPaths)
+        {
+            TextWriter tw = new StreamWriter("paths.txt");
+            for (int i = 0; i < allPaths.Count; i++)
+            {
+                tw.WriteLine(pathString(allPaths[i]));
+            }
+            tw.Close();
+        }
+
+
         private void help()
         {
             Console.WriteLine("---------");
@@ -1671,9 +2298,13 @@ namespace TestingApplication
             Console.WriteLine();
             Console.WriteLine("GetBest <ASN> - get the Best[i] set of the ASN in the tree rooted at d");
             Console.WriteLine();
+            Console.WriteLine("GetBestNew <ASN> - get the BestNew[i] set of the ASN in the tree rooted at d");
+            Console.WriteLine();
             Console.WriteLine("GetSecP <ASN> - get whether this node has a secure path to the destination");
             Console.WriteLine();
-            Console.WriteLine("GetPath <ASN> - get path from this ASN to the destination.");
+            Console.WriteLine("GetPath <ASN> - get path from this ASN to the destination, destination is auto computed.");
+            Console.WriteLine();
+            Console.WriteLine("GetAllPaths <ASN> - get paths from this ASN to the destination");
             Console.WriteLine();
             Console.WriteLine("sets <ASN> - flip S[ASN]");
             Console.WriteLine();

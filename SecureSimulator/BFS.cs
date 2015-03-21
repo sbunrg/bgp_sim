@@ -13,7 +13,7 @@ namespace SecureSimulator
      public static class ModifiedBfs
     {
          //default to  hash.
-		public static bool Hash=false;
+         public static bool Hash=true;
          public static bool OnlyNonStubs = false;
 
 
@@ -72,8 +72,8 @@ namespace SecureSimulator
         /// Modified by PGill Oct. 2010 to take in references to the Best, BucketTable and ChosenPaths sets. The function
         /// was also modified to populate these for our new sims.
         /// </summary>
-         public static void ExecuteBfs(NetworkGraph graph, List<UInt32> srcNodeNums, bool limitedDiscovery, bool includeSibling, 
-            RelationshipType allowedRelationships,ref List<UInt32>[] Best,ref List<UInt32>[][] BucketTable,ref List<UInt32>[] ChosenPath,
+         public static void ExecuteBfs(NetworkGraph graph, List<UInt32> srcNodeNums, bool limitedDiscovery, bool includeSibling,
+            RelationshipType allowedRelationships, ref List<UInt32>[] Best, ref List<UInt32>[] BestNew, ref List<UInt32>[][] BucketTable, ref List<UInt32>[] ChosenPath,
             ref UInt32[] ChosenParent, ref byte[] L, ref byte[] BestRelation)
         {
            
@@ -114,9 +114,11 @@ namespace SecureSimulator
                 AsNode currentNode = nodeQueue.Dequeue();
                 foreach (AsNode oppositeNode in currentNode.GetNeighborsByType(allowedRelationships | RelationshipType.BfsParentOf).Distinct())
                 {
+                    bool addedtoBest = false;
                     // If this is the first time we've see this node, mark it and possibly enqueue it for later examination
                     if (oppositeNode.InProcessBfsStatus == NodeInProcessBfsStatus.UnseenInCurrentRun)
                     {
+                        
                         // Case 1: oppositeNode is a newly discovered node, also unseen in any previous BFS runs
                         if (oppositeNode.PriorBfsStatus == NodePriorBfsStatus.NotDiscoveredInPriorBfs)
                         {
@@ -178,6 +180,27 @@ namespace SecureSimulator
                                     Best[oppositeNode.NodeNum] = new List<UInt32>();
                                 Best[oppositeNode.NodeNum].Add(currentNode.NodeNum);
                                 ChosenParent[oppositeNode.NodeNum] = currentNode.NodeNum;
+
+                                if (BestNew[oppositeNode.NodeNum] == null)
+                                    BestNew[oppositeNode.NodeNum] = new List<UInt32>();
+
+                                UInt32 encoded = 0;
+                                UInt32 NodeNumx = currentNode.NodeNum;
+
+                                if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.ProviderTo)
+                                {
+                                    encoded = (UInt32)((NodeNumx << 3) + Destination._PROVIDERCOLUMN);
+                                }
+                                else if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.CustomerOf || allowedRelationships == RelationshipType.NullRelationship)
+                                {
+                                    encoded = (UInt32)((NodeNumx << 3) + Destination._CUSTOMERCOLUMN);
+                                }
+                                else if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.PeerOf)
+                                {
+                                    encoded = (UInt32)((NodeNumx << 3) + Destination._PEERCOLUMN);
+                                }
+                                BestNew[oppositeNode.NodeNum].Add(encoded);
+
                             }
                            
                             // If we want to continue discovering past this newly found node, enqueue it
@@ -221,8 +244,10 @@ namespace SecureSimulator
                             //note that current node is a potential parent of opposite node here.
                             //equivalent to current node being one of the nodes in the tiebreak set
 
+                            //Console.WriteLine("Ties Breaker");
+
                             //UPDATED CONDITION TO DEAL WITH HASH FLAG
-                            if ((Hash && NewRouteWinsTieBreak(currentNode, oppositeNode, includeSibling)) || (!Hash && NewRouteWinsTieBreakOriginal(currentNode,oppositeNode,includeSibling)))
+                            if ((Hash && NewRouteWinsTieBreak(currentNode, oppositeNode, includeSibling)) || (!Hash && NewRouteWinsTieBreakOriginal(currentNode, oppositeNode, includeSibling)))
                             {
                                 // Tie-break algorithm says we have a new, better route to this node.
                                 // We need to switch the route through the current node instead.
@@ -230,7 +255,7 @@ namespace SecureSimulator
                                 oppositeNode.BfsParentNode = currentNode;
                                 currentNode.AddBfsChild(oppositeNode);
 
-                                if (!oppositeNode.isStub()||!OnlyNonStubs)
+                                if (!oppositeNode.isStub() || !OnlyNonStubs)
                                 {
                                     /*** update chosen parent***/
                                     ChosenParent[oppositeNode.NodeNum] = currentNode.NodeNum;
@@ -238,7 +263,7 @@ namespace SecureSimulator
                                     /***  update its chosen path ***/
 
                                     //if (allowedRelationships.HasFlag(RelationshipType.CustomerOf))
-                                    if ((allowedRelationships & RelationshipType.CustomerOf) == RelationshipType.CustomerOf || allowedRelationships==RelationshipType.NullRelationship)
+                                    if ((allowedRelationships & RelationshipType.CustomerOf) == RelationshipType.CustomerOf || allowedRelationships == RelationshipType.NullRelationship)
                                         utility.updatePath(oppositeNode.NodeNum, ChosenPath[currentNode.NodeNum], Destination._CUSTOMERCOLUMN, ref ChosenPath);
                                     //else if (allowedRelationships.HasFlag(RelationshipType.ProviderTo))
                                     else if ((allowedRelationships & RelationshipType.ProviderTo) == RelationshipType.ProviderTo)
@@ -250,8 +275,57 @@ namespace SecureSimulator
 
                             }
                             /*** NEED TO UPDATE BEST SET WHETHER OR NOT THIS WINS THE TIE BREAK!! **/
-                            if(!oppositeNode.isStub() || !OnlyNonStubs)
-                            Best[oppositeNode.NodeNum].Add(currentNode.NodeNum);
+                            if (!oppositeNode.isStub() || !OnlyNonStubs)
+                            {
+                                Best[oppositeNode.NodeNum].Add(currentNode.NodeNum);
+                                addedtoBest = true;
+                            }
+                        }
+                    }
+                    if ((Best[oppositeNode.NodeNum] != null))// && addedtoBest)// &&
+                    //(oppositeNode.PriorBfsStatus != NodePriorBfsStatus.DiscoveredInPriorBfs))
+                    {
+
+                        if (BestNew[oppositeNode.NodeNum] == null)
+                            BestNew[oppositeNode.NodeNum] = new List<UInt32>();
+
+                        UInt32 encoded = 0;
+                        UInt32 NodeNumx = currentNode.NodeNum;
+
+                        if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.ProviderTo)
+                        {
+                            encoded = (UInt32)((NodeNumx << 3) + Destination._PROVIDERCOLUMN);
+                        }
+                        else if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.CustomerOf || allowedRelationships == RelationshipType.NullRelationship)
+                        {
+                            encoded = (UInt32)((NodeNumx << 3) + Destination._CUSTOMERCOLUMN);
+                        }
+                        else if ((allowedRelationships & currentNode.GetRelationshipTypeOfNeighbor(oppositeNode)) == RelationshipType.PeerOf)
+                        {
+                            encoded = (UInt32)((NodeNumx << 3) + Destination._PEERCOLUMN);
+                        }
+
+                        UInt32 encoded0 = (UInt32)((NodeNumx << 3) + Destination._PROVIDERCOLUMN);
+                        UInt32 encoded1 = (UInt32)((NodeNumx << 3) + Destination._CUSTOMERCOLUMN);
+                        UInt32 encoded2 = (UInt32)((NodeNumx << 3) + Destination._PEERCOLUMN);
+
+
+                        if (!((BestNew[oppositeNode.NodeNum].Exists(element => element == encoded0)) || (BestNew[oppositeNode.NodeNum].Exists(element => element == encoded1)) || (BestNew[oppositeNode.NodeNum].Exists(element => element == encoded2))))
+                        {
+                            //Console.WriteLine(oppositeNode.NodeNum + "--> Entered for: " + ((UInt32)(((uint)encoded) >> 3) + " relation: " + (int)(encoded & 7)));
+                            //Console.WriteLine("encoded = " + encoded);
+                            if (encoded != 0)
+                            {
+                                //Console.WriteLine(oppositeNode.NodeNum + "--> Entered for: " + ((UInt32)(((uint)encoded) >> 3) + " relation: " + (int)(encoded & 7)));
+                                //if ((((allowedRelationships & RelationshipType.ProviderTo) == RelationshipType.ProviderTo) && oppositeNode.InProcessBfsStatus == NodeInProcessBfsStatus.ProcessedInCurrentRun))
+                                //{
+                                //    Console.Write("Rel: " + allowedRelationships + " & Node status: " + oppositeNode.InProcessBfsStatus + "\n");
+                                //}
+                                //else
+                                {
+                                    BestNew[oppositeNode.NodeNum].Add(encoded);
+                                }
+                            }
                         }
                     }
                 }
@@ -507,15 +581,15 @@ namespace SecureSimulator
         /// <summary>
         /// Builds the honest tree!
         /// </summary>
-        public static NetworkGraph RoutingTreeAlg(NetworkGraph graph, UInt32 rootNodeNum, ref List<UInt32>[] Best, ref List<UInt32>[][] BucketTable,
+        public static NetworkGraph RoutingTreeAlg(NetworkGraph graph, UInt32 rootNodeNum, ref List<UInt32>[] Best, ref List<UInt32>[] BestNew, ref List<UInt32>[][] BucketTable,
             ref List<UInt32>[] ChosenPath, ref UInt32[] ChosenParent, ref byte[] L, ref byte[] BestRelation)
         {
             //BFS to create the honest tree
             List<UInt32> nodeList = new List<UInt32>();
             nodeList.Add(rootNodeNum);
-            ExecuteBfs(graph, nodeList, false, true, RelationshipType.CustomerOf | RelationshipType.SiblingOf, ref Best,  ref BucketTable, ref ChosenPath, ref ChosenParent,ref L,ref BestRelation); // first stage BFS, customers and siblings
-            ExecuteBfs(graph, nodeList, true, false, RelationshipType.PeerOf, ref Best, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation);  // second stage BFS, peers
-            ExecuteBfs(graph, nodeList, false, true, RelationshipType.ProviderTo | RelationshipType.SiblingOf, ref Best, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L,ref BestRelation); // third stage BFS, providers and siblings
+            ExecuteBfs(graph, nodeList, false, true, RelationshipType.CustomerOf | RelationshipType.SiblingOf, ref Best, ref BestNew, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation); // first stage BFS, customers and siblings
+            ExecuteBfs(graph, nodeList, true, false, RelationshipType.PeerOf, ref Best, ref BestNew, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation);  // second stage BFS, peers
+            ExecuteBfs(graph, nodeList, false, true, RelationshipType.ProviderTo | RelationshipType.SiblingOf, ref Best, ref BestNew, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation); // third stage BFS, providers and siblings
 
          /*   OutputLog.LogMessageNoNewline(
                  LogLevelType.LogLevelInfo,
@@ -532,8 +606,11 @@ namespace SecureSimulator
         {
             //BFS to create the honest tree
             List<UInt32> nodeList = new List<UInt32>();
+            List<UInt32>[] BestNew;
+            BestNew = new List<UInt32>[Constants._numASNs];
+
             nodeList.Add(rootNodeNum);
-            ExecuteBfs(graph, nodeList, false, true, RelationshipType.NullRelationship, ref Best, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation); // first stage BFS, customers and siblings
+            ExecuteBfs(graph, nodeList, false, true, RelationshipType.NullRelationship, ref Best, ref BestNew, ref BucketTable, ref ChosenPath, ref ChosenParent, ref L, ref BestRelation); // first stage BFS, customers and siblings
            
             /*   OutputLog.LogMessageNoNewline(
                     LogLevelType.LogLevelInfo,

@@ -13,8 +13,8 @@ namespace SecureSimulator
         /// The numASNs const can be set based on the number of ASNs in the graph when
         /// it is read in.
         /// </summary>
-        public static int _numASNs = 65536;
-        public static int _maxPathLen = 50;
+        public static int _numASNs = 400000;
+        public static int _maxPathLen = 30;
         public static int _numRelationshipTypes = 3;
 
         public static char[] _queueMessageDelimiter = { ' ' };

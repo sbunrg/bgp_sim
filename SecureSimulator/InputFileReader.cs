@@ -196,13 +196,13 @@ namespace SecureSimulator
                     RelationshipType relationshipType;
                     switch (edgeDescriptor)
                     {
-                        case -1:
+                        case 1:
                             relationshipType = RelationshipType.CustomerOf;
                             break;
                         case 0:
                             relationshipType = RelationshipType.PeerOf;
                             break;
-                        case 1:
+                        case -1:
                             relationshipType = RelationshipType.ProviderTo;
                             break;
                         case 2:

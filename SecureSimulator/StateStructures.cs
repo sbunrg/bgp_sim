@@ -9,6 +9,7 @@ namespace SecureSimulator
     {
         public List<UInt32>[][] BucketTable;
         public List<UInt32>[] Best;
+        public List<UInt32>[] BestNew; //Added by Haseeb
         public byte[] BestRelation;
         public byte[] L;
         public float[] W;//May 3 - adding W to miniDests.

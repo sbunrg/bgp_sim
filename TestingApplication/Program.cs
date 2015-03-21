@@ -11,13 +11,13 @@ namespace TestingApplication
     {
         static void Main(string[] args)
         {
-            //string testPath = "mycontainer";
+            string testPath = "mycontainer";
             string directoryName = "";
             //   string newpth=SimulatorLibrary.generateDirectoryName(testPath, ref  directoryName);
-            TestingClass test = new TestingClass();
-            //SimulatorLibrary.setHash(false);
-            //SimulatorLibrary.useMiniDWeight = true;
-            //SimulatorLibrary.useLessHarshWeight = true;
+           TestingClass test = new TestingClass();
+      //      SimulatorLibrary.setHash(false);
+       //     SimulatorLibrary.useMiniDWeight = true;
+        //    SimulatorLibrary.useLessHarshWeight = true;
       //      testShortestPaths tsp = new testShortestPaths();
             // tsp.testSPInterface();
 
@@ -36,15 +36,15 @@ namespace TestingApplication
 
             /* temporary code to look at traffic to stubs through 
              * secure providers */
-            //ResultsExplorer res = new ResultsExplorer();
-            //string[] simulationDirectories = Directory.GetDirectories(ResultsExplorer.defaultResultsDirectory);
-            //string directory = simulationDirectories[33];
+          //  ResultsExplorer res = new ResultsExplorer();
+           // string[] simulationDirectories = Directory.GetDirectories(ResultsExplorer.defaultResultsDirectory);
+          //  string directory = simulationDirectories[33];
 
-            //resultObject canonical = res.loadSimulationNonInteractive(directory);
+      //      resultObject canonical = res.loadSimulationNonInteractive(directory);
        
        //     TrafficEngineering.trafficThroughSecureProviders(canonical);
 
-            //Console.WriteLine("foob");
+        //    Console.WriteLine("foob");
 
             //uncomment to this to get the regular program.
             test.CLI(false);

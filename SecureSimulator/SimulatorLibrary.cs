@@ -473,6 +473,7 @@ namespace SecureSimulator
             MiniDestination miniDestination = new MiniDestination();
             miniDestination.destination = destination;
             miniDestination.Best = new List<UInt32>[Constants._numASNs];
+            miniDestination.BestNew = new List<UInt32>[Constants._numASNs];
 
             miniDestination.BucketTable = new List<UInt32>[Constants._maxPathLen][];
             for(int i =0;i<miniDestination.BucketTable.Length;i++)
@@ -491,13 +492,13 @@ namespace SecureSimulator
             if (!readOnly)
             {
                 //run the BFS
-                ModifiedBfs.RoutingTreeAlg(g, destination, ref miniDestination.Best, ref miniDestination.BucketTable, ref ChosenPath, ref ChosenParent, ref miniDestination.L, ref miniDestination.BestRelation);
+                ModifiedBfs.RoutingTreeAlg(g, destination, ref miniDestination.Best, ref miniDestination.BestNew, ref miniDestination.BucketTable, ref ChosenPath, ref ChosenParent, ref miniDestination.L, ref miniDestination.BestRelation);
             }
             else
             {
                 NetworkGraph myCopy = new NetworkGraph(g);
                 //run the BFS
-                ModifiedBfs.RoutingTreeAlg(myCopy, destination, ref miniDestination.Best, ref miniDestination.BucketTable, ref ChosenPath, ref ChosenParent, ref miniDestination.L, ref miniDestination.BestRelation);
+                ModifiedBfs.RoutingTreeAlg(myCopy, destination, ref miniDestination.Best, ref miniDestination.BestNew, ref miniDestination.BucketTable, ref ChosenPath, ref ChosenParent, ref miniDestination.L, ref miniDestination.BestRelation);
            
 
             }

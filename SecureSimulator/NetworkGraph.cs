@@ -297,7 +297,5 @@ namespace SecureSimulator
             return nodeNums;
         }
 
-      
-
     }
 }

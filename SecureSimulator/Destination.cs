@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 
 namespace SecureSimulator
@@ -14,6 +15,7 @@ namespace SecureSimulator
     {
        public List<UInt32>[][] BucketTable;
        public List<UInt32>[] Best;
+       public List<UInt32>[] BestNew;
        public byte[] BestRelation;
        public bool[] SecP;
 
@@ -23,18 +25,21 @@ namespace SecureSimulator
 
        public byte[] L;
 
+       public int totalCount;
       
        public UInt32 destination;
 
         public const int _CUSTOMERCOLUMN = 0;
         public const int _PEERCOLUMN = 1;
         public const int _PROVIDERCOLUMN = 2;
+        public const int _NOREL = 3;
 
 
         public Destination(MiniDestination miniDestination)
         {
             this.BucketTable = miniDestination.BucketTable;
             this.Best = miniDestination.Best;
+            this.BestNew = miniDestination.BestNew;
             this.BestRelation = miniDestination.BestRelation;
             this.L = miniDestination.L;
             this.destination = miniDestination.destination;
@@ -55,12 +60,13 @@ namespace SecureSimulator
             this.ChosenParent[this.destination] = this.destination;
         }
 
-        public Destination(UInt32 destination, List<UInt32>[][] BucketTable, List<UInt32>[] Best, 
+        public Destination(UInt32 destination, List<UInt32>[][] BucketTable, List<UInt32>[] Best, List<UInt32>[] BestNew,
             List<UInt32>[] ChosenPath, UInt32[] ChosenParent,byte[] L,  byte[] BestRelation)
         {
             this.destination = destination;
             this.BucketTable = BucketTable;
             this.Best = Best;
+            this.BestNew = BestNew;
             this.ChosenPath = ChosenPath;
             this.ChosenParent = ChosenParent;
             this.L = L;
@@ -241,7 +247,7 @@ namespace SecureSimulator
         /// <param name="joined"></param>
         /// <param name="ASN"></param>
         /// <param name="col"></param>
-        private void unjoin(UInt32 joined, out UInt32 ASN, out int col)
+        public void unjoin(UInt32 joined, out UInt32 ASN, out int col)
         {
             ASN = (UInt32)(((uint)joined) >> 3);
             col = (int)(joined & 7); //and with 7 to get lower 3 bits
@@ -312,7 +318,7 @@ namespace SecureSimulator
             string toreturn = "";
 
             if (ChosenPath[n] == null)
-                return "no path found for this node, are you sure it exists?";
+				return "no_path";
 
             toreturn = Convert.ToString(ChosenPath[n][0]);//first element is this node with no annotations.
             for (int i = 1; i < ChosenPath[n].Count; i++)
@@ -331,6 +337,39 @@ namespace SecureSimulator
                         break;
                     case _PROVIDERCOLUMN:
                         toreturn = toreturn + " -> ";
+                        break;
+                }
+
+                toreturn = toreturn + ASN;
+            }
+
+            return toreturn;
+        }
+
+        public string GetPathCommaSep(UInt32 n)
+        {
+            string toreturn = "";
+
+            if (ChosenPath[n] == null)
+                return "no path found for this node, are you sure it exists?";
+
+            toreturn = Convert.ToString(ChosenPath[n][0]);//first element is this node with no annotations.
+            for (int i = 1; i < ChosenPath[n].Count; i++)
+            {
+                UInt32 ASN;
+                int col;
+                unjoin(ChosenPath[n][i], out ASN, out col);
+
+                switch (col)
+                {
+                    case _CUSTOMERCOLUMN:
+                        toreturn = toreturn + ",";
+                        break;
+                    case _PEERCOLUMN:
+                        toreturn = toreturn + ",";
+                        break;
+                    case _PROVIDERCOLUMN:
+                        toreturn = toreturn + ",";
                         break;
                 }
 
@@ -496,6 +535,274 @@ namespace SecureSimulator
 
             return toreturn;
 
+        }
+        public string GetBestNew(int n)
+        {
+            if (BestNew[n] == null)
+                return "no elements in the bestNew set of " + n + " is this a valid ASN?";
+            string toreturn = "BestNew set of node " + n + " is: ";
+            for (int i = 0; i < BestNew[n].Count; i++)
+            {
+                UInt32 ASnum;
+                int rel;
+
+                unjoin(BestNew[n][i], out ASnum, out rel);
+                
+                if (i < BestNew[n].Count - 1)
+                    toreturn = toreturn + ASnum + ",";
+                else
+                    toreturn = toreturn + ASnum;//last element do not put a comma.
+            }
+
+            return toreturn;
+
+        }
+
+        public string pathString(List<UInt32> path)
+        {
+            string toreturn = "";
+            toreturn = toreturn + Convert.ToString((UInt32)(((uint)path[0]) >> 3));
+            for (int j = 1; j < path.Count; j++)
+            {
+                UInt32 asn;
+                int col;
+                asn = (UInt32)(((uint)path[j]) >> 3);
+                col = (int)(path[j] & 7);
+
+                switch (col)
+                {
+                    case 0:
+                        toreturn = toreturn + " <- ";
+                        break;
+                    case 1:
+                        toreturn = toreturn + " -- ";
+                        break;
+                    case 2:
+                        toreturn = toreturn + " -> ";
+                        break;
+                    case 3:
+                        break;
+                }
+
+                toreturn = toreturn + asn;
+            }
+
+            return toreturn;
+
+        }
+
+        public bool GetAllPaths(UInt32 n, UInt32 dst, ref List<List<UInt32>> allPaths, List<UInt32> recvpath, ref TextWriter tw, ref int count)
+        {
+            if (dst != destination)
+            {
+                Console.Write("Incorrect destination call\n");
+                return false;
+            }
+            List<UInt32> path = new List<UInt32>(recvpath);
+            
+            int showStopper = 0;
+
+            //if (count > 50000)
+            //{
+            //    return true;
+            //}
+            
+            
+            if (BestNew[n] != null)
+            {
+                //foreach (UInt32 asnode in BestNew[n])
+                for (int i = 0; i < BestNew[n].Count; i++)
+                {
+                    //if (n == 3356)
+                    //{
+                    //    Console.WriteLine(n + ": i -> " + i + " where i goes upto " + BestNew[n].Count);
+                    //}
+                    UInt32 asnode = BestNew[n][i];
+                    int rels;
+                    UInt32 lastNum, destNum;
+                    unjoin(asnode, out destNum, out rels);
+                    unjoin(path[path.Count - 1], out lastNum, out rels);
+
+                    if (destNum == dst)
+                    {
+                        //UInt32 end = join(dst, Destination._NOREL);
+                        if (lastNum != destNum)
+                        {
+                            int rel, prevRel;
+                            UInt32 temp;
+                            unjoin(asnode, out temp, out rel);
+                            unjoin(path[path.Count - 1], out temp, out prevRel);
+
+                            if ((rel == Destination._PEERCOLUMN && prevRel == Destination._CUSTOMERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PROVIDERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PEERCOLUMN) || (prevRel == Destination._CUSTOMERCOLUMN && (rel == Destination._PEERCOLUMN || rel == Destination._PROVIDERCOLUMN)))
+                            {
+                                //continue;
+                                //break;
+                                return true;
+                            }
+                            
+                            path.Add(asnode);
+                        }
+                        if (allPaths.Contains(path))
+                        {
+                            Console.Write("\n**** Duplicate ****\n");
+                        }
+                        count = count + 1;
+                        allPaths.Add(path);
+                        if (allPaths.Count % 1500 == 0)
+                        {
+                            for (int j = 0; j < allPaths.Count; j++)
+                            {
+                                tw.WriteLine(pathString(allPaths[j]));
+                            }
+                            allPaths.Clear();
+                        }
+                        //if (count % 1000 == 0)
+                        //{
+                        //    Console.Write(count + " Paths found.\n");
+                        //}
+                        //Console.Write("Terminated\n");
+                        showStopper = 1;
+
+                        /*string toreturn = "";
+                        toreturn = toreturn + Convert.ToString((UInt32)(((uint)path[0]) >> 3));
+                        for (int j = 1; j < path.Count; j++)
+                        {
+                            UInt32 asn;
+                            int col;
+                            asn = (UInt32)(((uint)path[j]) >> 3);
+                            col = (int)(path[j] & 7);
+
+                            switch (col)
+                            {
+                                case 0:
+                                    toreturn = toreturn + " <- ";
+                                    break;
+                                case 1:
+                                    toreturn = toreturn + " -- ";
+                                    break;
+                                case 2:
+                                    toreturn = toreturn + " -> ";
+                                    break;
+                                case 3:
+                                    break;
+                            }
+
+                            toreturn = toreturn + asn;
+                        }
+
+                        Console.Write(toreturn + "\n");
+                         * */
+                        //break;
+                    }
+                    else
+                    {
+                        
+                        UInt32 ASN = (UInt32)(((uint)asnode) >> 3);
+                        int rel, prevRel;
+                        UInt32 temp;
+                        unjoin(asnode, out temp, out rel);
+                        unjoin(path[path.Count-1], out temp, out prevRel);
+                        //Console.Write("Came here for " + n + " : " + ASN +" and i: " + i +"\n");
+
+                        UInt32 encoded0 = (UInt32)((ASN << 3) + Destination._PROVIDERCOLUMN);
+                        UInt32 encoded1 = (UInt32)((ASN << 3) + Destination._CUSTOMERCOLUMN);
+                        UInt32 encoded2 = (UInt32)((ASN << 3) + Destination._PEERCOLUMN);
+                        UInt32 encoded3 = (UInt32)((ASN << 3) + Destination._NOREL);
+
+                        if (!((path.Exists(element => element == encoded0)) || (path.Exists(element => element == encoded1)) || (path.Exists(element => element == encoded2) || (path.Exists(element => element == encoded3)))) && (path.Count < 7))
+                        {
+                            if (showStopper == 0)
+                            {
+                                if ((rel == Destination._PEERCOLUMN && prevRel == Destination._CUSTOMERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PROVIDERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PEERCOLUMN) || (prevRel == Destination._CUSTOMERCOLUMN && (rel == Destination._PEERCOLUMN || rel == Destination._PROVIDERCOLUMN)))
+                                {
+                                    //tw.WriteLine("Dropped: " +pathString(path));
+                                    continue;
+                                }
+                                //Console.Write("Added :" + ASN + "\n");
+                                List<UInt32> tempath = new List<UInt32>(path);
+                                tempath.Add(asnode);
+                                GetAllPaths(ASN, dst, ref allPaths, tempath, ref tw, ref count);
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        public bool pathoflength(UInt32 n, UInt32 dst, ref List<List<UInt32>> allPaths, List<UInt32> recvpath, int length)
+        {
+            List<UInt32> path = new List<UInt32>(recvpath);
+
+            int showStopper = 0;
+
+            if (BestNew[n] != null)
+            {
+                for (int i = 0; i < BestNew[n].Count; i++)
+                {
+                    UInt32 asnode = BestNew[n][i];
+                    int rels;
+                    UInt32 lastNum, destNum;
+                    unjoin(asnode, out destNum, out rels);
+                    unjoin(path[path.Count - 1], out lastNum, out rels);
+
+                    if (destNum == dst)
+                    {
+                        if (lastNum != destNum)
+                        {
+                            int rel, prevRel;
+                            UInt32 temp;
+                            unjoin(asnode, out temp, out rel);
+                            unjoin(path[path.Count - 1], out temp, out prevRel);
+
+                            if ((rel == Destination._PEERCOLUMN && prevRel == Destination._CUSTOMERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PROVIDERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PEERCOLUMN) || (prevRel == Destination._CUSTOMERCOLUMN && (rel == Destination._PEERCOLUMN || rel == Destination._PROVIDERCOLUMN)))
+                            {
+                                return false;
+                            }
+
+                            path.Add(asnode);
+                        }
+                        allPaths.Add(path);
+                        showStopper = 1;
+						//Console.Out.WriteLine ("Checking Length: " + length);
+						//Console.Out.WriteLine("Shortest path is: " + pathString(path));
+                        return true;
+                    }
+                    else
+                    {
+
+                        UInt32 ASN = (UInt32)(((uint)asnode) >> 3);
+                        int rel, prevRel;
+                        UInt32 temp;
+                        unjoin(asnode, out temp, out rel);
+                        unjoin(path[path.Count - 1], out temp, out prevRel);
+            
+                        UInt32 encoded0 = (UInt32)((ASN << 3) + Destination._PROVIDERCOLUMN);
+                        UInt32 encoded1 = (UInt32)((ASN << 3) + Destination._CUSTOMERCOLUMN);
+                        UInt32 encoded2 = (UInt32)((ASN << 3) + Destination._PEERCOLUMN);
+                        UInt32 encoded3 = (UInt32)((ASN << 3) + Destination._NOREL);
+
+						if (!((path.Exists(element => element == encoded0)) || (path.Exists(element => element == encoded1)) || (path.Exists(element => element == encoded2) || (path.Exists(element => element == encoded3)))) && (path.Count < length))
+                        {
+                            if (showStopper == 0)
+                            {
+                                if ((rel == Destination._PEERCOLUMN && prevRel == Destination._CUSTOMERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PROVIDERCOLUMN) || (prevRel == Destination._PEERCOLUMN && rel == Destination._PEERCOLUMN) || (prevRel == Destination._CUSTOMERCOLUMN && (rel == Destination._PEERCOLUMN || rel == Destination._PROVIDERCOLUMN)))
+                                {
+                                    return false;
+                                }
+                                List<UInt32> tempath = new List<UInt32>(path);
+                                tempath.Add(asnode);
+                                return pathoflength(ASN, dst, ref allPaths, tempath, length);
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 }
