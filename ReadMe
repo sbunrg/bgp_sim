@@ -1,3 +1,4 @@
+Build & Run:
 The make file included uses xbuild on mac to compile the Release version of the project
 
 -- Call make in the root dir to compile everything
@@ -28,3 +29,23 @@ initialized and added 7018
 Tree generation took (ms): 260
 >>getpath 1 7018
 >>Path from 1 to 7018 is 1 -> 10753 -> 3549 -- 7018
+
+Getting Started:
+Ideally to get to know the code, one should start  with the following files:
+bgp_sim/TestingApplication/TestingClass.cs
+  Contains all the functions that can be called through the interface.
+  Before anything can be done, a topology has to be loaded. 
+  The initGraph() function does that.
+  This network graph will be used to create a routing tree for a given destination.
+  The initDestination function shows how a tree is generated for a given destination. A Destination object is created.
+  All data structures mentioned in the quicksand paper (Bucket Table etc.) are stored in this class.
+  Functions to query these data structures are also available.
+  
+bgp_sim/SecureSimulator/Destination.cs
+  Contains functions and variables to store data for a given destinations routing tree.
+  All path related functions are here.
+  
+bgp_sim/SecureSimulator/BFS.cs
+  Contains code that generates the routing tree and fills other data structures. Ideally this code should be left as is. 
+  Fiddling with this usually causes cascaded errors and breaks the simulator. Any changes to this code should be well thought out.
+
